@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable - 24125022</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111;
+            letter-spacing: -0.5px;
+        }
+
+        .header-left p {
+            font-size: 13px;
+            color: #888;
+            margin-top: 3px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #f5f5f5;
+            color: #555;
+            border: 1px solid #e5e5e5;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 12px;
+            padding: 16px 40px;
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 14px 18px;
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .stat-card .label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        .stat-card .value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111;
+        }
+
+        .stat-card .sub {
+            font-size: 11px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .main-content {
+            padding: 24px 40px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        /* Timetable */
+        .timetable-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid #e5e5e5;
+            margin-bottom: 32px;
+            background: #fff;
+        }
+
+        .timetable {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 960px;
+        }
+
+        .timetable thead th {
+            background: #fafafa;
+            padding: 12px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            border-bottom: 1px solid #e5e5e5;
+            text-align: center;
+        }
+
+        .timetable thead th:first-child {
+            text-align: left;
+            padding-left: 20px;
+            min-width: 100px;
+        }
+
+        .timetable tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .timetable td {
+            padding: 6px;
+            text-align: center;
+            vertical-align: top;
+            height: 72px;
+            border-right: 1px solid #f5f5f5;
+        }
+
+        .timetable td:last-child { border-right: none; }
+
+        .timetable td:first-child {
+            text-align: left;
+            padding-left: 20px;
+            vertical-align: middle;
+            background: #fafafa;
+            border-right: 1px solid #eee;
+        }
+
+        .time-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .time-sublabel {
+            font-size: 10px;
+            color: #bbb;
+            margin-top: 1px;
+        }
+
+        .empty-slot {
+            width: 100%;
+            height: 100%;
+            min-height: 60px;
+            border-radius: 6px;
+            background: #fafafa;
+            border: 1px dashed #e8e8e8;
+        }
+
+        /* Lunch */
+        .lunch-row td {
+            background: #fafafa;
+            height: 44px;
+            vertical-align: middle;
+            border-bottom: 1px solid #e5e5e5;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .lunch-label {
+            font-size: 11px;
+            color: #bbb;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* Course Cards */
+        .course-card {
+            border-radius: 6px;
+            padding: 8px 10px;
+            text-align: left;
+            height: 100%;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.12s ease;
+            cursor: default;
+            border-left: 3px solid;
+        }
+
+        .course-card:hover {
+            transform: scale(1.02);
+        }
+
+        .course-card .code {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            margin-bottom: 2px;
+        }
+
+        .course-card .name {
+            font-size: 10px;
+            font-weight: 400;
+            color: #666;
+            line-height: 1.3;
+        }
+
+        .course-card .room {
+            font-size: 9px;
+            color: #aaa;
+            margin-top: 3px;
+        }
+
+        .course-card .type-badge {
+            font-size: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            display: inline-block;
+            width: fit-content;
+            margin-top: 4px;
+        }
+
+        /* Minimal course colors - subtle tints */
+        .c-dac301 { background: #f0f4ff; border-left-color: #4a7cff; }
+        .c-dac301 .code { color: #3b6de0; }
+        .c-dac301 .type-badge { background: #e0eaff; color: #4a7cff; }
+
+        .c-dac303 { background: #f3f0ff; border-left-color: #7c5cdb; }
+        .c-dac303 .code { color: #6b4fc7; }
+        .c-dac303 .type-badge { background: #e8e0ff; color: #7c5cdb; }
+
+        .c-dac305 { background: #eef8f3; border-left-color: #3aae6f; }
+        .c-dac305 .code { color: #2d9760; }
+        .c-dac305 .type-badge { background: #dcf2e6; color: #3aae6f; }
+
+        .c-mso103 { background: #fdf6ec; border-left-color: #d4952a; }
+        .c-mso103 .code { color: #b87f20; }
+        .c-mso103 .type-badge { background: #f8edd8; color: #d4952a; }
+
+        .c-dat102 { background: #fdf0f4; border-left-color: #d94f78; }
+        .c-dat102 .code { color: #c0406a; }
+        .c-dat102 .type-badge { background: #f8dce5; color: #d94f78; }
+
+        /* Cancelled */
+        .cancelled {
+            background: #fafafa !important;
+            border-left-color: #ddd !important;
+            position: relative;
+        }
+        .cancelled .code, .cancelled .name, .cancelled .room { color: #ccc !important; text-decoration: line-through; }
+        .cancelled .type-badge { display: none; }
+        .cancelled::after {
+            content: 'CANCELLED';
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #e55;
+            background: #fff0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+        }
+
+        /* Course List */
+        .course-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 10px;
+        }
+
+        .course-info-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 16px 18px;
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            transition: border-color 0.15s;
+        }
+
+        .course-info-card:hover { border-color: #ddd; }
+
+        .color-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .course-info-card .info h3 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 4px;
+        }
+
+        .course-info-card .info .meta {
+            font-size: 11px;
+            color: #999;
+            line-height: 1.7;
+        }
+
+        .course-info-card .info .meta span {
+            color: #555;
+            font-weight: 500;
+        }
+
+        .credit-pill {
+            background: #f5f5f5;
+            color: #666;
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: auto;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        /* Today highlight */
+        .today-col { background: #f8faff; }
+
+        .today-header {
+            color: #4a7cff !important;
+            position: relative;
+        }
+
+        .today-header::after {
+            content: 'TODAY';
+            font-size: 8px;
+            font-weight: 700;
+            background: #4a7cff;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-left: 5px;
+            vertical-align: middle;
+            letter-spacing: 0.5px;
+        }
+
+        .now-indicator {
+            background: #fff8f0 !important;
+        }
+
+        @media (max-width: 768px) {
+            .header, .stats-bar, .main-content { padding-left: 16px; padding-right: 16px; }
+            .stats-bar { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-left">
+        <h1>Weekly Timetable</h1>
+        <p>B.Tech. (Data Science and Artificial Intelligence) &mdash; Third Year, Autumn Semester</p>
+    </div>
+    <div class="header-right">
+        <span class="badge">24125022</span>
+        <span class="badge">24DA2</span>
+        <span class="badge">Autumn 2025</span>
+    </div>
+</div>
+
+<div class="stats-bar">
+    <div class="stat-card">
+        <div class="label">Courses</div>
+        <div class="value">6</div>
+        <div class="sub">5 active + 1 non-scheduled</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Credits</div>
+        <div class="value">19</div>
+        <div class="sub">4 + 4 + 4 + 3 + 2 + 2</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Weekly Sessions</div>
+        <div class="value">17</div>
+        <div class="sub">11 Lec + 4 Tut + 2 Prac</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Busiest Day</div>
+        <div class="value">Mon</div>
+        <div class="sub">5 sessions</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Free Days</div>
+        <div class="value">Sat &amp; Sun</div>
+        <div class="sub">Weekend off</div>
+    </div>
+</div>
+
+<div class="main-content">
+
+    <div class="section-title">Schedule</div>
+
+    <div class="timetable-container">
+        <table class="timetable">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th id="col-mon">Mon</th>
+                    <th id="col-tue">Tue</th>
+                    <th id="col-wed">Wed</th>
+                    <th id="col-thu">Thu</th>
+                    <th id="col-fri">Fri</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 08:00 - 08:55 -->
+                <tr>
+                    <td>
+                        <div class="time-label">08:00</div>
+                        <div class="time-sublabel">08:55</div>
+                    </td>
+                    <td>
+                        <div class="course-card c-mso103">
+                            <div class="code">MSO-103</div>
+                            <div class="name">Optimisation Models</div>
+                            <div class="room">GB-202</div>
+                            <span class="type-badge">Lecture</span>
+                        </div>
+                    </td>
+                    <td><div class="empty-slot"></div></td>
+                    <td>
+                        <div class="course-card c-mso103">
+                            <div class="code">MSO-103</div>
+                            <div class="name">Optimisation Models</div>
+                            <div class="room">GB-202</div>
+                            <span class="type-badge">Lecture</span>
+                        </div>
+                    </td>
+                    <td><div class="empty-slot"></div></td>
+                    <td>
+                        <div class="course-card c-mso103">
+                            <div class="code">MSO-103</div>
+                            <div class="name">Optimisation Models</div>
+                            <div class="room">GB-202</div>
+                            <span class="type-badge">Tutorial</span>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- 09:00 - 09:55 -->
+                <tr>
+                    <td>
+                        <div class="time-label">09:00</div>
+                        <div class="time-sublabel">09:55</div>
+                    </td>
+                    <td><div class="empty-slot"></div></td>
+                    <td><div class="empty-slot"></div></td>
+                    <td><div class="empty-slot"></div></td>
+                    <td><div class="empty-slot"></div></td>
+                    <td><div class="empty-slot"></div></td>
+                </tr>
+
+                <!-- 10:00 - 10:55 -->
+                <tr>
+                    <td>
+                        <div class="time-label">10:00</div>
+                        <div class="time-sublabel">10:55</div>
+                    </td>
+                    <td>
+                        <div class="course-card c-dac305">
+                            <div class="code">DAC-305</div>
+                            <div class="name">Principle of Databases</div>
+                            <div class="room">APJ AKB-508</div>
+                            <span class="type-badge">Lecture</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="course-card c-dac303">
+                            <div class="code">DAC-303</div>
+                            <div class="name">Computer Network</div>
+                            <div class="room">GB-003</div>
+                            <span class="type-badge">Tutorial</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="course-card c-dac305">
+                            <div class="code">DAC-305</div>
+                            <div class="name">Principle of Databases</div>
+                            <div class="room">APJ AKB-508</div>
+                            <span class="type-badge">Lecture</span>
+                        </div>
+                    </td>
+                    <td><div class="empty-slot"></div></td>
+                    <td><div class="empty-slot"></div></td>
+                </tr>
+
+                <!-- 11:05 - 12:00 -->
+                <tr>
+                    <td>
+                        <div class="time-label">11:05</div>
+                        <div class="time-sublabel">12:00</div>
+                    </td>
+                    <td>
+                        <div class="course-card c-dac301">
+                            <div class="code">DAC-301</div>
+                            <div class="name">Deep Learning</div>
+                            <div class="room">APJ AKB-508</div>
+                            <span class="type-badge">Lecture</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="course-card c-dac301">
+                            <div class="code">DAC-301</div>
+                            <div class="name">Deep Learning</div>
+                            <div class="room">APJ AKB-508</div>
+                            <span class="type-badge">Lecture</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="course-card c-dac305">
+                            <div class="code">DAC-305</div>
+                            <div class="name">Principle of Databases</div>
+                            <div class="room">APJ AKB-508</div>
+                            <span class="type-badge">Lecture</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="course-card c-dac301">
+                            <div class="code">DAC-301</div>
+                            <div class="name">Deep Learning</div>
+                            <div class="room">APJ AKB-508</div>
+                            <span class="type-badge">Lecture</span>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- 12:05 - 13:00 -->
+                <tr>
+                    <td>
+                        <div class="time-label">12:05</div>
+                        <div class="time-sublabel">13:00</div>
+                    </td>
+                    <td>
+                        <div class="course-card c-dac305">
+                            <div class="code">DAC-305</div>
+                            <div class="name">Principle of Databases</div>
+                            <div class="room">GB-003</div>
+                            <span class="type-badge">Tutorial</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="course-card c-dac301">
+                            <div class="code">DAC-301</div>
+                            <div class="name">Deep Learning</div>
+                            <div class="room">GB-003</div>
+                            <span class="type-badge">Tutorial</span>
+                        </div>
+                    </td>
+                    <td><div class="empty-slot"></div></td>
+                    <td><div class="empty-slot"></div></td>
+                    <td><div class="empty-slot"></div></td>
+                </tr>
+
+                <!-- Lunch Break -->
+                <tr class="lunch-row">
+                    <td>
+                        <div class="time-label">13:00</div>
+                        <div class="time-sublabel">14:00</div>
+                    </td>
+                    <td colspan="5" style="text-align:center;">
+                        <span class="lunch-label">Lunch Break</span>
+                    </td>
+                </tr>
+
+                <!-- 14:00 - 14:55 -->
+                <tr>
+                    <td>
+                        <div class="time-label">14:00</div>
+                        <div class="time-sublabel">14:55</div>
+                    </td>
+                    <td><div class="empty-slot"></div></td>
+                    <td><div class="empty-slot"></div></td>
+                    <td><div class="empty-slot"></div></td>
+                    <td><div class="empty-slot"></div></td>
+                    <td><div class="empty-slot"></div></td>
+                </tr>
+
+                <!-- 15:00 - 15:55 -->
+                <tr>
+                    <td>
+                        <div class="time-label">15:00</div>
+                        <div class="time-sublabel">15:55</div>
+                    </td>
+                    <td>
+                        <div class="course-card c-dac303">
+                            <div class="code">DAC-303</div>
+                            <div class="name">Computer Network</div>
+                            <div class="room">APJ AKB-508</div>
+                            <span class="type-badge">Lecture</span>
+                        </div>
+                    </td>
+                    <td><div class="empty-slot"></div></td>
+                    <td>
+                        <div class="course-card c-dac303">
+                            <div class="code">DAC-303</div>
+                            <div class="name">Computer Network</div>
+                            <div class="room">APJ AKB-508</div>
+                            <span class="type-badge">Lecture</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="course-card c-dat102">
+                            <div class="code">DAT-102</div>
+                            <div class="name">Image Enhancement</div>
+                            <div class="room">&mdash;</div>
+                            <span class="type-badge">Practical</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="course-card c-dac303">
+                            <div class="code">DAC-303</div>
+                            <div class="name">Computer Network</div>
+                            <div class="room">APJ AKB-508</div>
+                            <span class="type-badge">Lecture</span>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- 16:00 - 16:55 -->
+                <tr>
+                    <td>
+                        <div class="time-label">16:00</div>
+                        <div class="time-sublabel">16:55</div>
+                    </td>
+                    <td><div class="empty-slot"></div></td>
+                    <td><div class="empty-slot"></div></td>
+                    <td><div class="empty-slot"></div></td>
+                    <td>
+                        <div class="course-card c-dat102">
+                            <div class="code">DAT-102</div>
+                            <div class="name">Image Enhancement</div>
+                            <div class="room">&mdash;</div>
+                            <span class="type-badge">Practical</span>
+                        </div>
+                    </td>
+                    <td><div class="empty-slot"></div></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section-title">Courses</div>
+
+    <div class="course-list">
+        <div class="course-info-card">
+            <div class="color-dot" style="background:#4a7cff;"></div>
+            <div class="info">
+                <h3>DAC-301 &mdash; Deep Learning</h3>
+                <div class="meta">
+                    <span>Gaurav Kumar Nayak</span> &bull; PCC &bull; APJ AKB-508<br>
+                    Lec: Mon / Wed / Fri 11:05<br>
+                    Tut: Tue 12:05 &bull; GB-003
+                </div>
+            </div>
+            <div class="credit-pill">4 Cr</div>
+        </div>
+
+        <div class="course-info-card">
+            <div class="color-dot" style="background:#7c5cdb;"></div>
+            <div class="info">
+                <h3>DAC-303 &mdash; Computer Network</h3>
+                <div class="meta">
+                    <span>Shalini Priya</span> &bull; PCC &bull; APJ AKB-508<br>
+                    Lec: Mon / Wed / Fri 15:00<br>
+                    Tut: Tue 10:00 &bull; GB-003
+                </div>
+            </div>
+            <div class="credit-pill">4 Cr</div>
+        </div>
+
+        <div class="course-info-card">
+            <div class="color-dot" style="background:#3aae6f;"></div>
+            <div class="info">
+                <h3>DAC-305 &mdash; Principle of Databases</h3>
+                <div class="meta">
+                    <span>Tapas Nayak</span> &bull; PCC &bull; APJ AKB-508<br>
+                    Lec: Mon / Wed 10:00, Thu 11:05<br>
+                    Tut: Mon 12:05 &bull; GB-003
+                </div>
+            </div>
+            <div class="credit-pill">4 Cr</div>
+        </div>
+
+        <div class="course-info-card">
+            <div class="color-dot" style="background:#d4952a;"></div>
+            <div class="info">
+                <h3>MSO-103 &mdash; Optimisation Models for Managers</h3>
+                <div class="meta">
+                    <span>Amit Upadhyay</span> &bull; OEC &bull; GB-202<br>
+                    Lec: Mon / Wed 08:00<br>
+                    Tut: Fri 08:00
+                </div>
+            </div>
+            <div class="credit-pill">3 Cr</div>
+        </div>
+
+        <div class="course-info-card">
+            <div class="color-dot" style="background:#d94f78;"></div>
+            <div class="info">
+                <h3>DAT-102 &mdash; Image Enhancement Techniques</h3>
+                <div class="meta">
+                    <span>Simanchal Padhy</span> &bull; TEB<br>
+                    Prac: Thu 15:00 - 16:55<br>
+                </div>
+            </div>
+            <div class="credit-pill">2 Cr</div>
+        </div>
+
+        <div class="course-info-card">
+            <div class="color-dot" style="background:#ccc;"></div>
+            <div class="info">
+                <h3>DAC-399 &mdash; Community Outreach</h3>
+                <div class="meta">
+                    CORE &bull; No scheduled classes
+                </div>
+            </div>
+            <div class="credit-pill">2 Cr</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const today = days[new Date().getDay()];
+    const dayMap = { Monday:1, Tuesday:2, Wednesday:3, Thursday:4, Friday:5 };
+
+    if (dayMap[today]) {
+        const ci = dayMap[today] + 1;
+        const th = document.querySelector(`thead tr th:nth-child(${ci})`);
+        if (th) th.classList.add('today-header');
+        document.querySelectorAll(`tbody tr:not(.lunch-row) td:nth-child(${ci})`).forEach(td => {
+            td.classList.add('today-col');
+        });
+    }
+</script>
+
+</body>
+</html>
